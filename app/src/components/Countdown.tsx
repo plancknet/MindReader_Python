@@ -103,29 +103,30 @@ export function Countdown({
   const remainingSeconds = useMemo(() => Math.ceil(remaining), [remaining]);
 
   return (
-    <div className="flex min-h-[75vh] flex-col items-center justify-center gap-10">
-      <div className="text-center animate-fade-in">
+    <div className="flex w-full flex-1 flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-3 text-center animate-fade-in">
         <h2 className="text-xl font-semibold text-slate-200 sm:text-2xl md:text-3xl">
           {remainingSeconds > 0 ? title : "Lendo sua mente..."}
         </h2>
         {remainingSeconds > 0 ? (
-          <div className="mt-4 text-6xl font-bold text-primary animate-pulse-glow sm:text-7xl md:text-8xl">
+          <div className="text-6xl font-bold text-primary animate-pulse-glow sm:text-7xl md:text-8xl">
             {remainingSeconds}
           </div>
         ) : (
-          <div className="mt-6 text-4xl text-slate-300 animate-pulse">🧠✨</div>
+          <div className="text-4xl text-slate-300 animate-pulse">🧠✨</div>
         )}
-        <p className="mt-4 text-sm uppercase tracking-[0.35em] text-slate-400">
+        <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
           Sinal do olhar: {(status.signal * 100).toFixed(0)}%
         </p>
       </div>
 
-      <div className="w-full">
+      <div className="flex w-full flex-1 items-center justify-center px-2 pb-4 sm:px-0">
         <WordGrid
           ref={gridRef}
           words={words}
           highlightQuadrant={highlight}
           interactive={false}
+          className="aspect-[4/3] h-full max-h-[calc(100vh-220px)] min-h-[200px]"
         />
       </div>
     </div>

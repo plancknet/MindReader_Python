@@ -7,7 +7,7 @@ interface WebcamSetupProps {
 
 export function WebcamSetup({ onContinue, ready = true }: WebcamSetupProps) {
   return (
-    <div className="grid gap-12 md:grid-cols-[1.1fr_1fr] md:items-center">
+    <div className="grid min-h-[60vh] gap-10 md:grid-cols-[1.1fr_1fr] md:items-center">
       <div className="space-y-6 animate-fade-in">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.35em] text-slate-300">
           <span>Etapa 1</span>
@@ -48,7 +48,7 @@ export function WebcamSetup({ onContinue, ready = true }: WebcamSetupProps) {
       <div className="flex items-center justify-center">
         <GazeVideoFeed
           active={ready}
-          className="relative flex h-[420px] w-full max-w-sm items-center justify-center overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/5 p-3 shadow-[0_0_55px_rgba(56,189,248,0.25)]"
+          className="relative aspect-[3/4] w-full max-w-md overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/10 shadow-[0_0_55px_rgba(56,189,248,0.25)]"
         />
       </div>
     </div>

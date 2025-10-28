@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
 interface GazeVideoFeedProps {
@@ -24,6 +25,7 @@ export function GazeVideoFeed({ active, className }: GazeVideoFeedProps) {
       video.style.height = "100%";
       video.style.borderRadius = "1.75rem";
       video.style.objectFit = "cover";
+      video.style.display = "block";
       containerRef.current.appendChild(video);
       setReady(true);
     }
@@ -41,8 +43,22 @@ export function GazeVideoFeed({ active, className }: GazeVideoFeedProps) {
     }
   }, [active]);
 
+  useEffect(
+    () => () => {
+      setReady(false);
+    },
+    [],
+  );
+
   return (
-    <div ref={containerRef} className={className} data-ready={ready}>
+    <div
+      ref={containerRef}
+      className={clsx(
+        "relative flex items-center justify-center",
+        className,
+      )}
+      data-ready={ready}
+    >
       {!ready && (
         <div className="flex h-full w-full items-center justify-center rounded-[1.75rem] border border-dashed border-white/10 bg-white/5 text-sm uppercase tracking-[0.35em] text-slate-400">
           Preparando câmera...

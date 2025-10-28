@@ -34,6 +34,8 @@ class GazeTracker {
 
   private loading: Promise<WebGazerInstance | null> | null = null;
 
+  private previewVisible = true;
+
   private emit(point: GazePoint | null) {
     this.listeners.forEach((listener) => listener(point));
   }
@@ -128,11 +130,12 @@ class GazeTracker {
 
     webgazer.removeMouseEventListeners?.();
     webgazer.showPredictionPoints?.(false);
-    webgazer.showVideoPreview?.(true);
     webgazer.setGazeListener(this.handlePrediction);
+    this.applyPreviewVisibility(webgazer);
 
     try {
       await webgazer.begin();
+      this.applyPreviewVisibility(webgazer);
       return true;
     } catch {
       this.active = false;
@@ -169,6 +172,35 @@ class GazeTracker {
       supported: isSupported,
       signal: this.getSignalStrength(),
     };
+  }
+
+  setPreviewVisible(visible: boolean) {
+    this.previewVisible = visible;
+    this.applyPreviewVisibility();
+  }
+
+  private applyPreviewVisibility(instance?: WebGazerInstance | null) {
+    const webgazer = instance ?? this.instance;
+    try {
+      webgazer?.showVideoPreview?.(this.previewVisible);
+    } catch {
+      // ignore
+    }
+
+    if (!isBrowser) {
+      return;
+    }
+
+    const display = this.previewVisible ? "block" : "none";
+    const video = document.getElementById("webgazerVideoFeed") as HTMLElement | null;
+    const overlay = document.getElementById("webgazerVideoCanvas") as HTMLElement | null;
+
+    if (video) {
+      video.style.display = display;
+    }
+    if (overlay) {
+      overlay.style.display = display;
+    }
   }
 }
 

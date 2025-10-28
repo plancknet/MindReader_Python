@@ -6,6 +6,7 @@ interface WordGridProps {
   highlightQuadrant?: number | null;
   interactive?: boolean;
   onQuadrantClick?: (quadrant: number) => void;
+  className?: string;
 }
 
 const quadrantClassNames = [
@@ -29,10 +30,19 @@ const getQuadrantWords = (words: string[], quadrant: number): string[] => {
 };
 
 export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
-  ({ words, highlightQuadrant = null, interactive = false, onQuadrantClick }, ref) => (
+  ({
+    words,
+    highlightQuadrant = null,
+    interactive = false,
+    onQuadrantClick,
+    className,
+  }, ref) => (
     <div
       ref={ref}
-      className="word-grid-container grid w-full max-w-5xl grid-cols-2 gap-3 px-2 pb-4 sm:gap-4 sm:px-0"
+      className={clsx(
+        "word-grid-container grid min-h-0 w-full max-w-5xl grid-cols-2 grid-rows-2 gap-3 px-2 sm:gap-4 sm:px-0",
+        className,
+      )}
     >
       {[0, 1, 2, 3].map((quadrant) => {
         const quadrantWords = getQuadrantWords(words, quadrant);
@@ -46,7 +56,7 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
             disabled={!interactive}
             className={clsx(
               quadrantClassNames[quadrant],
-              "relative flex min-h-[140px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/15 p-4 shadow-[0_0_35px_rgba(15,23,42,0.35)] transition duration-200",
+              "relative flex h-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/15 p-4 shadow-[0_0_35px_rgba(15,23,42,0.35)] transition duration-200",
               interactive
                 ? "cursor-pointer hover:scale-[1.02]"
                 : "cursor-default",
@@ -55,8 +65,8 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
                 : "scale-100",
             )}
           >
-            <div className="pointer-events-none absolute inset-0 bg-black/20" />
-            <div className="relative flex flex-col items-center gap-3 text-center">
+            <div className="pointer-events-none absolute inset-0 bg-black/25" />
+            <div className="relative flex h-full flex-col items-center justify-center gap-3 text-center">
               {quadrantWords.map((word, index) => (
                 <span
                   key={word ?? `${quadrant}-${index}`}
