@@ -9,6 +9,7 @@ interface CountdownProps {
   onComplete: (quadrant: number, info: { confidence: number; signal: number }) => void;
   title?: string;
   showHighlight?: boolean;
+  layout?: "grid" | "spread";
 }
 
 export function Countdown({
@@ -17,6 +18,7 @@ export function Countdown({
   onComplete,
   title = "Fixe seu olhar na palavra escolhida",
   showHighlight = true,
+  layout = "spread",
 }: CountdownProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const boundsRef = useRef<DOMRect | null>(null);
@@ -117,11 +119,12 @@ export function Countdown({
           highlightQuadrant={highlight}
           interactive={false}
           showHighlight={showHighlight}
+          layout={layout}
           className="h-full max-h-[calc(100vh-220px)] min-h-[220px] max-w-6xl gap-8 sm:gap-12"
         />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/30 bg-white/10 text-4xl font-bold text-white shadow-[0_0_45px_rgba(56,189,248,0.35)] sm:h-40 sm:w-40 sm:text-5xl">
-            {remainingSeconds > 0 ? remainingSeconds : "🧠"}
+            {remainingSeconds > 0 ? remainingSeconds : "FIM"}
           </div>
         </div>
         <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-slate-400">

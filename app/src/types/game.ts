@@ -1,4 +1,6 @@
-export type GameStage = "setup" | "calibration" | "countdown" | "reveal";
+export type TopicKey = "fruta" | "animal" | "pais" | "profissao";
+
+export type GameStage = "setup" | "grid" | "countdown" | "reveal";
 
 export type Mode = "debug" | "production";
 

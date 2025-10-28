@@ -1,7 +1,10 @@
-import type { Mode } from "../types";
+import type { Mode, TopicKey } from "../types";
 import { PALETTES, type PaletteKey } from "../data/palettes";
+import { TOPIC_LABELS } from "../data/words";
 
 interface SetupScreenProps {
+  selectedTopic: TopicKey;
+  onTopicChange: (key: TopicKey) => void;
   selectedPalette: PaletteKey;
   onPaletteChange: (key: PaletteKey) => void;
   mode: Mode;
@@ -9,11 +12,12 @@ interface SetupScreenProps {
   onContinue: () => void;
 }
 
-const paletteEntries = Object.entries(PALETTES) as Array<
-  [PaletteKey, (typeof PALETTES)[PaletteKey]]
->;
+const topicEntries = Object.entries(TOPIC_LABELS) as Array<[TopicKey, string]>;
+const paletteEntries = Object.entries(PALETTES) as Array<[PaletteKey, (typeof PALETTES)[PaletteKey]]>;
 
 export function SetupScreen({
+  selectedTopic,
+  onTopicChange,
   selectedPalette,
   onPaletteChange,
   mode,
@@ -24,19 +28,36 @@ export function SetupScreen({
     <div className="space-y-10">
       <div className="space-y-4 text-center animate-fade-in">
         <h1 className="text-4xl font-semibold text-white md:text-5xl">
-          Personalize sua leitura mental
+          Personalize sua experiencia
         </h1>
         <p className="mx-auto max-w-2xl text-base text-slate-300 md:text-lg">
-          Escolha a paleta que combina com o momento e defina se deseja ver os
-          destaques de debug durante a leitura.
+          Escolha um topico, defina o modo de operacao e selecione a paleta ideal antes de iniciar a leitura mental.
         </p>
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-left text-sm uppercase tracking-[0.35em] text-slate-400">
-          Paleta visual
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <h2 className="text-left text-sm uppercase tracking-[0.35em] text-slate-400">Topicos</h2>
+        <div className="grid gap-3 sm:grid-cols-4">
+          {topicEntries.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onTopicChange(key)}
+              className={`rounded-3xl border px-6 py-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-quadrant.b ${
+                selectedTopic === key
+                  ? "border-quadrant.b/80 bg-white/10 shadow-[0_12px_30px_rgba(56,189,248,0.35)]"
+                  : "border-white/10 bg-white/5 hover:border-quadrant.b/40 hover:bg-white/10"
+              }`}
+            >
+              <span className="text-xl font-semibold text-white">{label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-left text-sm uppercase tracking-[0.35em] text-slate-400">Paleta visual</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
           {paletteEntries.map(([key, palette]) => {
             const isActive = key === selectedPalette;
             return (
@@ -59,7 +80,7 @@ export function SetupScreen({
                 <div className="mt-4 flex gap-2">
                   {palette.colors.quadrants.map((hsl, idx) => (
                     <span
-                      key={idx} // deliberate: visual swatches
+                      key={idx}
                       className="h-10 flex-1 rounded-full"
                       style={{ background: `hsl(${hsl})` }}
                     />
@@ -72,9 +93,7 @@ export function SetupScreen({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-left text-sm uppercase tracking-[0.35em] text-slate-400">
-          Modo de operacao
-        </h2>
+        <h2 className="text-left text-sm uppercase tracking-[0.35em] text-slate-400">Modo de operacao</h2>
         <div className="flex flex-wrap gap-4">
           <button
             type="button"
@@ -100,18 +119,17 @@ export function SetupScreen({
           </button>
         </div>
         <p className="text-sm text-slate-400">
-          No modo debug os quadrantes brilham quando recebem foco do olhar. No
-          modo producao eles permanecem discretos.
+          No modo debug os quadrantes brilham quando recebem foco; no modo producao eles permanecem discretos.
         </p>
       </section>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-2">
         <button
           type="button"
           onClick={onContinue}
           className="rounded-full bg-gradient-to-r from-quadrant.b to-quadrant.d px-12 py-4 text-lg font-semibold text-slate-900 shadow-[0_20px_45px_rgba(56,189,248,0.35)] transition hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-quadrant.b"
         >
-          Comecar calibracao
+          Continuar
         </button>
       </div>
     </div>

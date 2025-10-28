@@ -61,7 +61,7 @@ export function GazeVideoFeed({ active, className }: GazeVideoFeedProps) {
     >
       {!ready && (
         <div className="flex h-full w-full items-center justify-center rounded-[1.75rem] border border-dashed border-white/10 bg-white/5 text-sm uppercase tracking-[0.35em] text-slate-400">
-          Preparando câmera...
+          Preparando camera...
         </div>
       )}
     </div>

@@ -68,7 +68,7 @@ export function MindReveal({ word, onRestart }: MindRevealProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9 }}
           >
-            Sua mente foi lida com sucesso! 🧠✨
+            Sua mente foi lida com sucesso! FIM
           </motion.p>
         </motion.div>
       </div>

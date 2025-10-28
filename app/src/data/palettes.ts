@@ -1,4 +1,4 @@
-export type PaletteKey = "aurora" | "sunset" | "nebula";
+export type PaletteKey = "night" | "day";
 
 export interface PaletteDefinition {
   label: string;
@@ -14,9 +14,9 @@ export interface PaletteDefinition {
 }
 
 export const PALETTES: Record<PaletteKey, PaletteDefinition> = {
-  aurora: {
-    label: "Aurora Boreal",
-    description: "Gradientes frios com brilhos azulados.",
+  night: {
+    label: "Modo Noturno",
+    description: "Contraste alto com brilhos frios.",
     colors: {
       background: "230 35% 6%",
       foreground: "210 25% 96%",
@@ -31,43 +31,26 @@ export const PALETTES: Record<PaletteKey, PaletteDefinition> = {
       ],
     },
   },
-  sunset: {
-    label: "Pôr do Sol",
-    description: "Céu quente com tons alaranjados e rosados.",
+  day: {
+    label: "Modo Diurno",
+    description: "Fundo claro com tons solares.",
     colors: {
-      background: "18 45% 8%",
-      foreground: "28 35% 96%",
-      primary: "25 90% 58%",
-      accent: "340 80% 65%",
-      card: "22 40% 15%",
+      background: "48 100% 97%",
+      foreground: "26 30% 18%",
+      primary: "32 95% 55%",
+      accent: "12 85% 58%",
+      card: "0 0% 100%",
       quadrants: [
-        "25 95% 62%",
-        "340 82% 64%",
-        "12 86% 55%",
-        "40 95% 60%",
-      ],
-    },
-  },
-  nebula: {
-    label: "Nebulosa",
-    description: "Mistura cósmica de roxos e verdes vibrantes.",
-    colors: {
-      background: "258 50% 7%",
-      foreground: "260 50% 96%",
-      primary: "275 80% 65%",
-      accent: "160 70% 55%",
-      card: "255 40% 15%",
-      quadrants: [
-        "278 90% 70%",
-        "160 75% 55%",
-        "200 85% 60%",
-        "320 90% 66%",
+        "32 95% 60%",
+        "12 85% 60%",
+        "147 70% 45%",
+        "212 80% 55%",
       ],
     },
   },
 };
 
-export const DEFAULT_PALETTE: PaletteKey = "aurora";
+export const DEFAULT_PALETTE: PaletteKey = "night";
 
 export const applyPalette = (palette: PaletteDefinition) => {
   const root = document.documentElement;

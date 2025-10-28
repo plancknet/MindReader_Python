@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { forwardRef } from "react";
+import { forwardRef, type CSSProperties } from "react";
 
 interface WordGridProps {
   words: string[];
@@ -8,6 +8,7 @@ interface WordGridProps {
   onQuadrantClick?: (quadrant: number) => void;
   className?: string;
   showHighlight?: boolean;
+  layout?: "grid" | "spread";
 }
 
 const quadrantClassNames = [
@@ -15,6 +16,13 @@ const quadrantClassNames = [
   "quadrant-2",
   "quadrant-3",
   "quadrant-4",
+];
+
+const spreadPositions: CSSProperties[] = [
+  { top: 0, left: 0, transform: "translate(-10%, -10%)" },
+  { top: 0, right: 0, transform: "translate(10%, -10%)" },
+  { bottom: 0, left: 0, transform: "translate(-10%, 10%)" },
+  { bottom: 0, right: 0, transform: "translate(10%, 10%)" },
 ];
 
 const getQuadrantWords = (words: string[], quadrant: number): string[] => {
@@ -38,11 +46,14 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
     onQuadrantClick,
     className,
     showHighlight = true,
+    layout = "grid",
   }, ref) => (
     <div
       ref={ref}
       className={clsx(
-        "word-grid-container grid min-h-0 w-full max-w-5xl grid-cols-2 grid-rows-2 gap-3 px-2 sm:gap-4 sm:px-0",
+        layout === "spread"
+          ? "word-grid-container relative h-full w-full max-w-6xl"
+          : "word-grid-container grid min-h-0 w-full max-w-5xl grid-cols-2 grid-rows-2 gap-3 px-2 sm:gap-4 sm:px-0",
         className,
       )}
     >
@@ -50,7 +61,6 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
         const quadrantWords = getQuadrantWords(words, quadrant);
         const isCurrentHighlighted = highlightQuadrant === quadrant;
         const shouldHighlight = showHighlight && isCurrentHighlighted;
-
         return (
           <button
             key={quadrant}
@@ -59,7 +69,9 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
             disabled={!interactive}
             className={clsx(
               quadrantClassNames[quadrant],
-              "relative flex h-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/15 p-4 shadow-[0_0_35px_rgba(15,23,42,0.35)] transition duration-200",
+              layout === "spread"
+                ? "absolute flex w-[48%] max-w-xs flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/15 p-4 shadow-[0_0_35px_rgba(15,23,42,0.35)] transition duration-200 sm:max-w-sm"
+                : "relative flex h-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/15 p-4 shadow-[0_0_35px_rgba(15,23,42,0.35)] transition duration-200",
               interactive
                 ? "cursor-pointer hover:scale-[1.02]"
                 : "cursor-default",
@@ -67,6 +79,7 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
                 ? "scale-[1.02] ring-4 ring-white/50"
                 : "scale-100",
             )}
+            style={layout === "spread" ? spreadPositions[quadrant] : undefined}
           >
             <div className="pointer-events-none absolute inset-0 bg-black/25" />
             <div className="relative flex h-full flex-col items-center justify-center gap-3 text-center">
