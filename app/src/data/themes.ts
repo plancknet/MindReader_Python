@@ -1,4 +1,4 @@
-export type ThemeKey = "paises" | "frutas" | "animais";
+import type { ThemeKey } from "../types";
 
 export interface ThemeDefinition {
   label: string;
@@ -6,7 +6,7 @@ export interface ThemeDefinition {
 }
 
 export const THEMES: Record<ThemeKey, ThemeDefinition> = {
-  paises: {
+  countries: {
     label: "Países",
     words: [
       "Brasil",
@@ -39,9 +39,14 @@ export const THEMES: Record<ThemeKey, ThemeDefinition> = {
       "Egito",
       "Marrocos",
       "Turquia",
+      "Grécia",
+      "Tailândia",
+      "Indonésia",
+      "Filipinas",
+      "Vietnã",
     ],
   },
-  frutas: {
+  fruits: {
     label: "Frutas",
     words: [
       "Maçã",
@@ -74,9 +79,14 @@ export const THEMES: Record<ThemeKey, ThemeDefinition> = {
       "Goiaba",
       "Carambola",
       "Abacate",
+      "Nectarina",
+      "Cupuaçu",
+      "Açaí",
+      "Mirtilo",
+      "Physalis",
     ],
   },
-  animais: {
+  animals: {
     label: "Animais",
     words: [
       "Leão",
@@ -109,6 +119,23 @@ export const THEMES: Record<ThemeKey, ThemeDefinition> = {
       "Cobra",
       "Tartaruga",
       "Lontra",
+      "Foca",
+      "Pinguim",
+      "Tamanduá",
+      "Quati",
     ],
   },
+};
+
+export const getRandomWords = (theme: ThemeKey, count: number): string[] => {
+  const pool = [...THEMES[theme].words];
+  const result: string[] = [];
+
+  for (let i = 0; i < count && pool.length > 0; i += 1) {
+    const index = Math.floor(Math.random() * pool.length);
+    result.push(pool[index]);
+    pool.splice(index, 1);
+  }
+
+  return result;
 };

@@ -1,37 +1,16 @@
-import type { ThemeKey } from "../data/themes";
+export type ThemeKey = "countries" | "fruits" | "animals";
 
-export type AppPhase =
-  | "intro"
+export type GameStage =
+  | "welcome"
+  | "webcam"
   | "theme"
-  | "first-look"
-  | "second-look"
+  | "first-countdown"
+  | "second-countdown"
   | "reveal";
-
-export interface QuadrantState {
-  id: number;
-  words: string[];
-}
 
 export interface TrackingSnapshot {
   quadrantId: number | null;
   confidence: number;
   timestamp: number;
-}
-
-export interface FocusResolution {
-  index: number;
-  confidence: number;
-  source: "gaze" | "manual" | "low-signal";
-}
-
-export interface GameState {
-  phase: AppPhase;
-  theme: ThemeKey | null;
-  initialQuadrants: QuadrantState[];
-  focusHistory: TrackingSnapshot[];
-  selectedQuadrant: number | null;
-  finalSelection: QuadrantState | null;
-  selectedWord: string | null;
-  isDebugMode: boolean;
-  countdownActive: boolean;
+  source: "gaze" | "low-signal";
 }

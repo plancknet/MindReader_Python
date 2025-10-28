@@ -22,7 +22,7 @@ export function GazeVideoFeed({ active, className }: GazeVideoFeedProps) {
       video.style.margin = "0";
       video.style.width = "100%";
       video.style.height = "100%";
-      video.style.borderRadius = "1.5rem";
+      video.style.borderRadius = "1.75rem";
       video.style.objectFit = "cover";
       containerRef.current.appendChild(video);
       setReady(true);
@@ -34,21 +34,17 @@ export function GazeVideoFeed({ active, className }: GazeVideoFeedProps) {
       overlay.style.left = "0";
       overlay.style.width = "100%";
       overlay.style.height = "100%";
-      overlay.style.borderRadius = "1.5rem";
-      overlay.style.opacity = "0.35";
+      overlay.style.borderRadius = "1.75rem";
+      overlay.style.opacity = "0.3";
       overlay.style.pointerEvents = "none";
       containerRef.current.appendChild(overlay);
     }
   }, [active]);
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      data-ready={ready}
-    >
+    <div ref={containerRef} className={className} data-ready={ready}>
       {!ready && (
-        <div className="flex h-full w-full items-center justify-center rounded-3xl border border-dashed border-slate-700/80 bg-slate-900/40 text-sm text-slate-500">
+        <div className="flex h-full w-full items-center justify-center rounded-[1.75rem] border border-dashed border-white/10 bg-white/5 text-sm uppercase tracking-[0.35em] text-slate-400">
           Preparando câmera...
         </div>
       )}
