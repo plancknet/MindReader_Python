@@ -8,14 +8,22 @@ import { RevealScreen } from "./components/screens/RevealScreen";
 import { buildFinalQuadrants, buildInitialQuadrants } from "./utils/game";
 import { gazeTracker } from "./services/gazeTracker";
 
+const PHASE_LABEL: Record<AppPhase, string> = {
+  intro: "Calibração",
+  theme: "Escolha do tema",
+  "first-look": "Leitura 1/2",
+  "second-look": "Leitura 2/2",
+  reveal: "Resultado",
+};
+
 function App() {
   const [phase, setPhase] = useState<AppPhase>("intro");
   const [theme, setTheme] = useState<ThemeKey | null>(null);
   const [initialQuadrants, setInitialQuadrants] = useState<string[][]>([]);
   const [finalQuadrants, setFinalQuadrants] = useState<string[][]>([]);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [debugMode, setDebugMode] = useState<boolean>(false);
-  const [trackingEnabled, setTrackingEnabled] = useState<boolean>(false);
+  const [debugMode, setDebugMode] = useState(false);
+  const [trackingEnabled, setTrackingEnabled] = useState(false);
   const [focusHistory, setFocusHistory] = useState<TrackingSnapshot[]>([]);
 
   const currentThemeLabel = useMemo(
@@ -106,9 +114,27 @@ function App() {
       : null;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.15),_transparent_50%),radial-gradient(circle_at_bottom,_rgba(148,113,254,0.12),_transparent_55%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-[#020416] text-slate-100">
+      <div className="pointer-events-none absolute inset-0 -z-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),transparent_60%),radial-gradient(circle_at_bottom,_rgba(244,114,182,0.16),transparent_55%)]" />
+        <div className="absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-quadrant.a/25 blur-[160px]" />
+        <div className="absolute -right-20 top-10 h-60 w-60 rounded-full bg-quadrant.b/30 blur-[140px]" />
+      </div>
+
       <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-12 md:px-12">
+        <header className="mb-12 flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.35em] text-slate-400">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            <span>Fase</span>
+            <span className="text-quadrant.b">{PHASE_LABEL[phase]}</span>
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            <span>Tracking</span>
+            <span className={trackingEnabled ? "text-quadrant.a" : "text-amber-300"}>
+              {trackingEnabled ? "Ativo" : "Em espera"}
+            </span>
+          </span>
+        </header>
+
         {phase === "intro" && (
           <IntroScreen onStart={handleStart} showVideo={trackingEnabled} />
         )}
@@ -157,8 +183,8 @@ function App() {
           </div>
         )}
 
-        <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-white/5 pt-6 text-xs uppercase tracking-[0.3em] text-slate-600">
-          <span>MindReader · Experimento interativo</span>
+        <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-white/5 pt-6 text-xs uppercase tracking-[0.3em] text-slate-500">
+          <span>MindReader · experimento interativo</span>
           {currentThemeLabel && <span>Tema: {currentThemeLabel}</span>}
           {averageConfidence !== null && (
             <span>Precisão média: {averageConfidence}%</span>

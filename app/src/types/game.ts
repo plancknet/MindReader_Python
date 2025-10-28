@@ -21,7 +21,7 @@ export interface TrackingSnapshot {
 export interface FocusResolution {
   index: number;
   confidence: number;
-  source: "gaze" | "manual";
+  source: "gaze" | "manual" | "low-signal";
 }
 
 export interface GameState {

@@ -15,15 +15,15 @@ interface FocusStageScreenProps {
 }
 
 const STAGE_LABELS: Record<1 | 2, string> = {
-  1: "Escolha o quadrante com sua palavra",
+  1: "Encontre o quadrante com a sua palavra",
   2: "Fixe a palavra final",
 };
 
 const QUADRANT_BASE_STYLES = [
-  "border-quadrant.a/50 bg-quadrant.a/15",
-  "border-quadrant.b/50 bg-quadrant.b/15",
-  "border-quadrant.c/50 bg-quadrant.c/15",
-  "border-quadrant.d/50 bg-quadrant.d/15",
+  "border-quadrant.a/45 bg-gradient-to-br from-quadrant.a/15 via-slate-900/40 to-transparent",
+  "border-quadrant.b/45 bg-gradient-to-br from-quadrant.b/15 via-slate-900/40 to-transparent",
+  "border-quadrant.c/45 bg-gradient-to-br from-quadrant.c/15 via-slate-900/40 to-transparent",
+  "border-quadrant.d/45 bg-gradient-to-br from-quadrant.d/15 via-slate-900/40 to-transparent",
 ];
 
 const QUADRANT_GLOW_STYLES = [
@@ -47,10 +47,12 @@ export function FocusStageScreen({
   const countsRef = useRef([0, 0, 0, 0]);
   const resolvedRef = useRef(false);
   const fallbackRef = useRef(false);
+
   const [highlight, setHighlight] = useState<number | null>(null);
-  const [manualPrompt, setManualPrompt] = useState(false);
+  const [lowSignal, setLowSignal] = useState(false);
 
   const { point, status } = useGazeTracking({ enabled: trackingEnabled });
+
   const { remaining, isRunning, start, reset } = useCountdown({
     seconds: countdownSeconds,
     autoStart: true,
@@ -62,20 +64,27 @@ export function FocusStageScreen({
       const counts = countsRef.current;
       const total = counts.reduce((acc, value) => acc + value, 0);
       const best = Math.max(...counts);
-      const bestIndex = counts.indexOf(best);
+      const bestIndex = Math.max(0, counts.indexOf(best));
       const confidence = total > 0 ? best / total : 0;
 
       const signalTooLow = status.signal < 0.2;
       const confidenceTooLow = confidence < 0.35;
       const insufficient = total === 0 || signalTooLow || confidenceTooLow;
 
+      resolvedRef.current = true;
+
       if (insufficient) {
-        setManualPrompt(true);
+        fallbackRef.current = true;
+        setLowSignal(true);
         onFallback();
+        onResolve({
+          index: bestIndex,
+          confidence,
+          source: "low-signal",
+        });
         return;
       }
 
-      resolvedRef.current = true;
       onResolve({
         index: bestIndex,
         confidence,
@@ -89,7 +98,7 @@ export function FocusStageScreen({
     resolvedRef.current = false;
     fallbackRef.current = false;
     setHighlight(null);
-    setManualPrompt(false);
+    setLowSignal(false);
     reset();
     start();
   }, [quadrants, reset, start]);
@@ -97,16 +106,16 @@ export function FocusStageScreen({
   useEffect(() => {
     if (!status.supported && !fallbackRef.current) {
       fallbackRef.current = true;
-      setManualPrompt(true);
+      setLowSignal(true);
       onFallback();
     }
   }, [onFallback, status.supported]);
 
   useEffect(() => {
     if (!trackingEnabled) {
-      setManualPrompt(true);
+      setLowSignal(true);
     } else if (!fallbackRef.current) {
-      setManualPrompt(false);
+      setLowSignal(false);
     }
   }, [trackingEnabled]);
 
@@ -123,7 +132,7 @@ export function FocusStageScreen({
   }, []);
 
   useEffect(() => {
-    if (!point || !isRunning) {
+    if (!point || !isRunning || resolvedRef.current) {
       return;
     }
 
@@ -155,20 +164,19 @@ export function FocusStageScreen({
 
     setHighlight(quadrantIndex);
     countsRef.current[quadrantIndex] += 1;
-  }, [point, isRunning]);
+  }, [isRunning, point]);
 
   const remainingSeconds = useMemo(
     () => Math.ceil(remaining),
     [remaining],
   );
+
   const progress = useMemo(() => {
-    if (!Number.isFinite(remaining)) {
+    if (!Number.isFinite(remaining) || countdownSeconds === 0) {
       return 0;
     }
-    return Math.max(
-      0,
-      Math.min(1, remaining / countdownSeconds),
-    );
+    const elapsed = countdownSeconds - remaining;
+    return Math.max(0, Math.min(1, elapsed / countdownSeconds));
   }, [countdownSeconds, remaining]);
 
   const handleManualResolve = (index: number) => {
@@ -181,31 +189,44 @@ export function FocusStageScreen({
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-8">
+    <div className="relative flex h-full flex-col items-center justify-center gap-10">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.15),transparent_60%)]" />
+        <div className="absolute inset-0 rotate-180 bg-[radial-gradient(circle_at_bottom,_rgba(244,114,182,0.12),transparent_55%)]" />
+      </div>
+
       <div className="text-center">
-        <p className="text-sm uppercase tracking-[0.4em] text-slate-400">
-          Fixe seu olhar na palavra escolhida
-        </p>
-        <h2 className="mt-3 text-4xl font-semibold text-white md:text-5xl">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.35em] text-slate-300">
+          <span>MindSync</span>
+          <span className="text-quadrant.b">#{stage}</span>
+        </div>
+        <h2 className="mt-4 text-4xl font-semibold text-white md:text-5xl">
           Quadrante {stage}
         </h2>
         <p className="mt-3 text-base text-slate-300">
-          {STAGE_LABELS[stage]} -{" "}
-          {remainingSeconds > 0 ? `${remainingSeconds}s` : "Processando..."}
+          {STAGE_LABELS[stage]} ·{" "}
+          {remainingSeconds > 0 ? `${remainingSeconds}s` : "processando..."}
         </p>
-        {status.supported ? (
-          <p className="mt-2 text-xs uppercase tracking-[0.35em] text-slate-500">
-            Sinal do olhar: {(status.signal * 100).toFixed(0)}%
-          </p>
-        ) : (
-          <p className="mt-2 text-xs uppercase tracking-[0.35em] text-amber-400">
-            Rastreio não suportado - ative o modo debug
-          </p>
-        )}
+        <div className="mt-4 flex flex-col items-center gap-2 text-xs uppercase tracking-[0.35em]">
+          {status.supported ? (
+            <span className="text-slate-500">
+              Intensidade do olhar: {(status.signal * 100).toFixed(0)}%
+            </span>
+          ) : (
+            <span className="text-amber-400">
+              Rastreio não suportado · modo manual liberado
+            </span>
+          )}
+          {(lowSignal || debugMode) && (
+            <span className="text-amber-300">
+              Sinal fraco · MindReader escolheu automaticamente (clique para ajustar)
+            </span>
+          )}
+        </div>
 
-        <div className="mx-auto mt-6 h-2 w-56 overflow-hidden rounded-full bg-slate-800/70">
+        <div className="mx-auto mt-6 h-2 w-60 overflow-hidden rounded-full bg-white/5">
           <div
-            className="h-full origin-left rounded-full bg-quadrant.b transition-transform duration-75 ease-out"
+            className="h-full origin-left rounded-full bg-gradient-to-r from-quadrant.a via-quadrant.b to-quadrant.d transition-transform duration-150 ease-out"
             style={{ transform: `scaleX(${progress})` }}
           />
         </div>
@@ -213,25 +234,23 @@ export function FocusStageScreen({
 
       <div
         ref={gridRef}
-        className="grid h-[480px] w-full max-w-4xl grid-cols-2 grid-rows-2 gap-5"
+        className="relative grid h-[500px] w-full max-w-4xl grid-cols-2 grid-rows-2 gap-5"
       >
+        <div className="pointer-events-none absolute inset-0 -z-10 rounded-[2.4rem] border border-white/5 bg-gradient-to-br from-white/5 via-slate-900/30 to-slate-950/60 blur-3xl" />
+
         {quadrants.map((words, idx) => (
           <button
             key={idx}
             type="button"
             onClick={() => handleManualResolve(idx)}
-            disabled={!debugMode && !manualPrompt}
             className={clsx(
-              "group relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border bg-slate-900/30 px-6 py-8 text-center shadow-inner transition",
+              "group relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border px-6 py-8 text-center shadow-[0_0_25px_rgba(15,23,42,0.35)] transition duration-200",
               QUADRANT_BASE_STYLES[idx],
               highlight === idx &&
                 "ring-2 ring-white/80 ring-offset-2 ring-offset-slate-950",
               highlight === idx && QUADRANT_GLOW_STYLES[idx],
-              !debugMode &&
-                !manualPrompt &&
-                "cursor-default",
-              (debugMode || manualPrompt) &&
-                "hover:border-white/60 hover:bg-white/10 hover:text-white",
+              (debugMode || lowSignal) &&
+                "hover:border-white/70 hover:bg-white/10 hover:text-white hover:shadow-[0_0_35px_rgba(148,163,184,0.35)]",
             )}
           >
             <span className="text-xs uppercase tracking-[0.4em] text-slate-400">
@@ -239,12 +258,12 @@ export function FocusStageScreen({
             </span>
             <ul
               className={clsx(
-                "mt-4 space-y-2 text-lg font-semibold text-slate-100",
+                "mt-4 space-y-2 text-lg font-semibold text-slate-100 transition-transform duration-150",
                 stage === 2 && "text-2xl",
               )}
             >
               {words.map((word) => (
-                <li key={word} className="transition group-hover:scale-[1.025]">
+                <li key={word} className="transition group-hover:scale-[1.04]">
                   {word}
                 </li>
               ))}
@@ -254,18 +273,18 @@ export function FocusStageScreen({
                 </li>
               )}
             </ul>
-            {(debugMode || manualPrompt) && (
+            {(debugMode || lowSignal) && (
               <span className="mt-6 text-[0.65rem] uppercase tracking-[0.35em] text-slate-400">
-                Clique para confirmar
+                Clique para corrigir
               </span>
             )}
           </button>
         ))}
       </div>
 
-      {(manualPrompt || debugMode) && (
+      {(lowSignal || debugMode) && (
         <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
-          Modo debug ativo - clique no quadrante observado
+          Ferramenta de backup ativa · confirmação manual disponível
         </p>
       )}
     </div>
