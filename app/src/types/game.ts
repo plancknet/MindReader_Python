@@ -1,12 +1,6 @@
-export type ThemeKey = "countries" | "fruits" | "animals";
+export type GameStage = "setup" | "calibration" | "countdown" | "reveal";
 
-export type GameStage =
-  | "welcome"
-  | "webcam"
-  | "theme"
-  | "first-countdown"
-  | "second-countdown"
-  | "reveal";
+export type Mode = "debug" | "production";
 
 export interface TrackingSnapshot {
   quadrantId: number | null;

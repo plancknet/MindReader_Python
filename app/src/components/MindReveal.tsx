@@ -27,7 +27,7 @@ export function MindReveal({ word, onRestart }: MindRevealProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          Eu li a palavra em que você pensou.
+          Eu li a palavra em que voce pensou.
         </motion.h2>
 
         <motion.div
@@ -41,7 +41,7 @@ export function MindReveal({ word, onRestart }: MindRevealProps) {
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ repeat: Infinity, duration: 2.5 }}
           >
-            A palavra revelada é
+            A palavra revelada e
           </motion.span>
           <motion.div
             className="relative rounded-[2rem] border border-quadrant.b/50 bg-quadrant.b/20 px-12 py-8 text-4xl font-bold text-white shadow-[0_0_45px_rgba(56,189,248,0.35)] md:text-5xl"
@@ -73,7 +73,7 @@ export function MindReveal({ word, onRestart }: MindRevealProps) {
         </motion.div>
       </div>
 
-  <motion.button
+      <motion.button
         type="button"
         onClick={onRestart}
         className="rounded-full border border-white/15 bg-transparent px-10 py-3 text-sm font-semibold uppercase tracking-[0.35em] text-slate-200 transition hover:border-quadrant.a/80 hover:text-quadrant.a focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-quadrant.a"

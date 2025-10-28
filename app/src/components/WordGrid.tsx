@@ -7,6 +7,7 @@ interface WordGridProps {
   interactive?: boolean;
   onQuadrantClick?: (quadrant: number) => void;
   className?: string;
+  showHighlight?: boolean;
 }
 
 const quadrantClassNames = [
@@ -36,6 +37,7 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
     interactive = false,
     onQuadrantClick,
     className,
+    showHighlight = true,
   }, ref) => (
     <div
       ref={ref}
@@ -46,7 +48,8 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
     >
       {[0, 1, 2, 3].map((quadrant) => {
         const quadrantWords = getQuadrantWords(words, quadrant);
-        const isHighlighted = highlightQuadrant === quadrant;
+        const isCurrentHighlighted = highlightQuadrant === quadrant;
+        const shouldHighlight = showHighlight && isCurrentHighlighted;
 
         return (
           <button
@@ -60,7 +63,7 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
               interactive
                 ? "cursor-pointer hover:scale-[1.02]"
                 : "cursor-default",
-              isHighlighted
+              shouldHighlight
                 ? "scale-[1.02] ring-4 ring-white/50"
                 : "scale-100",
             )}
@@ -75,7 +78,7 @@ export const WordGrid = forwardRef<HTMLDivElement, WordGridProps>(
                     words.length === 4
                       ? "text-3xl sm:text-4xl"
                       : "text-lg sm:text-xl",
-                    isHighlighted ? "scale-[1.05]" : "scale-100",
+                    shouldHighlight ? "scale-[1.05]" : "scale-100",
                   )}
                 >
                   {word}

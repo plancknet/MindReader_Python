@@ -8,6 +8,7 @@ interface CountdownProps {
   duration?: number;
   onComplete: (quadrant: number, info: { confidence: number; signal: number }) => void;
   title?: string;
+  showHighlight?: boolean;
 }
 
 export function Countdown({
@@ -15,6 +16,7 @@ export function Countdown({
   duration = 5,
   onComplete,
   title = "Fixe seu olhar na palavra escolhida",
+  showHighlight = true,
 }: CountdownProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const boundsRef = useRef<DOMRect | null>(null);
@@ -103,31 +105,28 @@ export function Countdown({
   const remainingSeconds = useMemo(() => Math.ceil(remaining), [remaining]);
 
   return (
-    <div className="flex w-full flex-1 flex-col items-center gap-6">
-      <div className="flex flex-col items-center gap-3 text-center animate-fade-in">
-        <h2 className="text-xl font-semibold text-slate-200 sm:text-2xl md:text-3xl">
-          {remainingSeconds > 0 ? title : "Lendo sua mente..."}
-        </h2>
-        {remainingSeconds > 0 ? (
-          <div className="text-6xl font-bold text-primary animate-pulse-glow sm:text-7xl md:text-8xl">
-            {remainingSeconds}
-          </div>
-        ) : (
-          <div className="text-4xl text-slate-300 animate-pulse">🧠✨</div>
-        )}
-        <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
-          Sinal do olhar: {(status.signal * 100).toFixed(0)}%
-        </p>
+    <div className="flex w-full flex-1 flex-col gap-6">
+      <div className="text-center text-sm uppercase tracking-[0.4em] text-slate-400">
+        {remainingSeconds > 0 ? title : "Processando leitura..."}
       </div>
 
-      <div className="flex w-full flex-1 items-center justify-center px-2 pb-4 sm:px-0">
+      <div className="relative flex flex-1 items-center justify-center px-2 pb-4 sm:px-0">
         <WordGrid
           ref={gridRef}
           words={words}
           highlightQuadrant={highlight}
           interactive={false}
-          className="aspect-[4/3] h-full max-h-[calc(100vh-220px)] min-h-[200px]"
+          showHighlight={showHighlight}
+          className="h-full max-h-[calc(100vh-220px)] min-h-[220px] max-w-6xl gap-8 sm:gap-12"
         />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-white/30 bg-white/10 text-4xl font-bold text-white shadow-[0_0_45px_rgba(56,189,248,0.35)] sm:h-40 sm:w-40 sm:text-5xl">
+            {remainingSeconds > 0 ? remainingSeconds : "🧠"}
+          </div>
+        </div>
+        <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-slate-400">
+          Sinal do olhar: {(status.signal * 100).toFixed(0)}%
+        </div>
       </div>
     </div>
   );

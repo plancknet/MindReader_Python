@@ -1,27 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
-import { WelcomeScreen } from "../components/WelcomeScreen";
-import { WebcamSetup } from "../components/WebcamSetup";
-import { ThemeSelection } from "../components/ThemeSelection";
+import { SetupScreen } from "../components/SetupScreen";
+import { CalibrationScreen } from "../components/CalibrationScreen";
 import { Countdown } from "../components/Countdown";
 import { MindReveal } from "../components/MindReveal";
+import {
+  applyPalette,
+  DEFAULT_PALETTE,
+  PALETTES,
+  type PaletteKey,
+} from "../data/palettes";
+import { getRandomWords } from "../data/words";
 import { WORDS_PER_QUADRANT } from "../utils/constants";
-import { THEMES, getRandomWords } from "../data/themes";
-import type { GameStage, ThemeKey } from "../types";
+import type { GameStage, Mode } from "../types";
 import { gazeTracker } from "../services/gazeTracker";
 
-const FIRST_STAGE_WORDS = 16;
+const WORDS_PER_SESSION = WORDS_PER_QUADRANT;
+
+const STAGE_LABELS: Record<GameStage, string> = {
+  setup: "Configuracao",
+  calibration: "Calibracao",
+  countdown: "Leitura",
+  reveal: "Resultado",
+};
 
 export default function Index() {
-  const [stage, setStage] = useState<GameStage>("welcome");
-  const [theme, setTheme] = useState<ThemeKey | null>(null);
+  const [stage, setStage] = useState<GameStage>("setup");
+  const [mode, setMode] = useState<Mode>("debug");
+  const [palette, setPalette] = useState<PaletteKey>(DEFAULT_PALETTE);
   const [words, setWords] = useState<string[]>([]);
-  const [finalWords, setFinalWords] = useState<string[]>([]);
   const [finalWord, setFinalWord] = useState<string | null>(null);
   const [lastConfidence, setLastConfidence] = useState<number | null>(null);
   const [lastSignal, setLastSignal] = useState<number | null>(null);
 
   useEffect(() => {
-    if (stage === "webcam" || stage === "first-countdown" || stage === "second-countdown") {
+    applyPalette(PALETTES[palette]);
+  }, [palette]);
+
+  useEffect(() => {
+    if (stage === "calibration" || stage === "countdown") {
       gazeTracker.start().catch(() => undefined);
       return () => {
         gazeTracker.stop().catch(() => undefined);
@@ -31,62 +47,37 @@ export default function Index() {
   }, [stage]);
 
   useEffect(() => {
-    gazeTracker.setPreviewVisible(stage === "webcam");
+    gazeTracker.setPreviewVisible(stage === "calibration");
   }, [stage]);
 
-  const currentThemeLabel = useMemo(
-    () => (theme ? THEMES[theme]?.label ?? "" : ""),
-    [theme],
-  );
+  const stageLabel = useMemo(() => STAGE_LABELS[stage], [stage]);
 
-  const handleStart = () => {
-    setStage("webcam");
-  };
-
-  const handleCalibrationComplete = () => {
-    setStage("theme");
-  };
-
-  const handleThemeSelect = (selectedTheme: ThemeKey) => {
-    setTheme(selectedTheme);
-    const selectedWords = getRandomWords(selectedTheme, FIRST_STAGE_WORDS);
-    setWords(selectedWords);
-    setFinalWords([]);
+  const handleSetupContinue = () => {
+    setWords(getRandomWords(WORDS_PER_SESSION));
     setFinalWord(null);
-    setStage("first-countdown");
+    setLastConfidence(null);
+    setLastSignal(null);
+    setStage("calibration");
   };
 
-  const handleFirstCountdownComplete = (
+  const handleCalibrationContinue = () => {
+    setStage("countdown");
+  };
+
+  const handleCountdownComplete = (
     quadrant: number,
     info: { confidence: number; signal: number },
   ) => {
     setLastConfidence(info.confidence);
     setLastSignal(info.signal);
-
-    const startIndex = quadrant * WORDS_PER_QUADRANT;
-    const slice = words.slice(startIndex, startIndex + WORDS_PER_QUADRANT);
-    setFinalWords(slice);
-    setStage("second-countdown");
-  };
-
-  const handleSecondCountdownComplete = (
-    quadrant: number,
-    info: { confidence: number; signal: number },
-  ) => {
-    setLastConfidence(info.confidence);
-    setLastSignal(info.signal);
-
-    const word = finalWords[quadrant] ?? null;
-    setFinalWord(word);
+    setFinalWord(words[quadrant] ?? null);
     setStage("reveal");
   };
 
   const handleRestart = () => {
-    setStage("welcome");
-    setTheme(null);
-    setWords([]);
-    setFinalWords([]);
+    setStage("setup");
     setFinalWord(null);
+    setWords([]);
     setLastConfidence(null);
     setLastSignal(null);
   };
@@ -95,15 +86,19 @@ export default function Index() {
     <div className="flex min-h-screen flex-col gap-6 px-4 pb-6 pt-8 sm:px-8">
       <header className="flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.35em] text-slate-400">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
-          <span>Fase atual</span>
-          <span className="text-quadrant.b">{stage}</span>
+          <span>Fase</span>
+          <span className="text-quadrant.b">{stageLabel}</span>
         </span>
-        {currentThemeLabel && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
-            <span>Tema</span>
-            <span className="text-white">{currentThemeLabel}</span>
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+          <span>Modo</span>
+          <span className="text-white">
+            {mode === "debug" ? "Debug" : "Produção"}
           </span>
-        )}
+        </span>
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+          <span>Paleta</span>
+          <span className="text-white">{PALETTES[palette].label}</span>
+        </span>
         {lastConfidence !== null && (
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
             <span>Confiança</span>
@@ -118,27 +113,27 @@ export default function Index() {
       </header>
 
       <main className="flex flex-1 flex-col overflow-hidden">
-        {stage === "welcome" && <WelcomeScreen onStart={handleStart} />}
-
-        {stage === "webcam" && <WebcamSetup onContinue={handleCalibrationComplete} />}
-
-        {stage === "theme" && <ThemeSelection onSelect={handleThemeSelect} />}
-
-        {stage === "first-countdown" && (
-          <Countdown
-            words={words}
-            duration={5}
-            onComplete={handleFirstCountdownComplete}
-            title="Fixe seu olhar na palavra escolhida"
+        {stage === "setup" && (
+          <SetupScreen
+            selectedPalette={palette}
+            onPaletteChange={setPalette}
+            mode={mode}
+            onModeChange={setMode}
+            onContinue={handleSetupContinue}
           />
         )}
 
-        {stage === "second-countdown" && (
+        {stage === "calibration" && (
+          <CalibrationScreen onContinue={handleCalibrationContinue} />
+        )}
+
+        {stage === "countdown" && (
           <Countdown
-            words={finalWords}
+            words={words}
             duration={5}
-            onComplete={handleSecondCountdownComplete}
-            title="Agora escolha a palavra final"
+            onComplete={handleCountdownComplete}
+            title="Fixe seu olhar na palavra escolhida"
+            showHighlight={mode === "debug"}
           />
         )}
 
